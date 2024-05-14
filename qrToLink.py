@@ -2,6 +2,7 @@ import pandas as pd
 import requests
 import csv
 import urllib.parse
+import pdb
 
 # This method uses .urllib.request.urlopen to follow and redirects and return the final redirect of the URL.
 def get_final_redirect(url):
@@ -68,8 +69,10 @@ def create_link(link_id, api_key, api_secret, link_data):
 
 
 def read_csv_and_update_links(filename):
-    branch_key_live = ""  # Replace with Branch Live Key
-    branch_secret = "" # Replace with Branch secret
+    print('Live key: ')
+    branch_key_live = input()
+    print('Secret: ')
+    branch_secret = input()
     try:
         with open(filename, 'r') as file:
             reader = csv.reader(file)
@@ -80,6 +83,7 @@ def read_csv_and_update_links(filename):
                 if row:  # Check if the row is not empty
                     url = row[0].strip()  # Extract URL from the first column and remove
                     #print("\nget_final_redirect call")
+                    pdb.set_trace()
                     final_url = get_final_redirect(url)
                     print(f"{final_url}")
                     #if final URL is a Branch link, grab relevant link data and update base URL with that data
@@ -102,7 +106,9 @@ def read_csv_and_update_links(filename):
         print(f"An error occurred: {e}")
 
 # Example usage:
-filename = "qr_test.csv" # Replace with the path to .csv or QR URLs
+# filename = "qr_test.csv" # Replace with the path to .csv or QR URLs
+print('Path to csv: ')
+filename = input()
 
 read_csv_and_update_links(filename)
 
