@@ -8,13 +8,23 @@ import pdb
 def get_final_redirect(url):
     if not url.startswith("https://"):
         url = "https://" + url
+    # try:
+    #     with urllib.request.urlopen(url) as response:
+    #         final_url = response.geturl()
+    #         return final_url
+    # except urllib.error.URLError as e:
+    #     print(f"Error getting final redirect of {url}: {e}")
+    #     return None
+    headers = {
+        'User-Agent': 'Mozilla/5.0 (iPhone14,3; U; CPU iPhone OS 15_0 like Mac OS X) AppleWebKit/602.1.50 (KHTML, like Gecko) Version/10.0 Mobile/19A346 Safari/602.1'
+    }
+
     try:
-        with urllib.request.urlopen(url) as response:
-            final_url = response.geturl()
-            return final_url
-    except urllib.error.URLError as e:
-        print(f"Error getting final redirect of {url}: {e}")
-        return None
+        response = requests.head(url, headers=headers, allow_redirects=True)
+        return response.url
+    except requests.RequestException as e:
+        print('Warning: did not parse URL: {}'.format(url))
+        print(e)
 
 # This method returns any url parameters after ".com/"
 def get_trailing_url_params(url):
@@ -83,7 +93,7 @@ def read_csv_and_update_links(filename):
                 if row:  # Check if the row is not empty
                     url = row[0].strip()  # Extract URL from the first column and remove
                     #print("\nget_final_redirect call")
-                    pdb.set_trace()
+                    # pdb.set_trace()
                     final_url = get_final_redirect(url)
                     print(f"{final_url}")
                     #if final URL is a Branch link, grab relevant link data and update base URL with that data
