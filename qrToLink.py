@@ -6,8 +6,9 @@ import pdb
 
 # This method uses .urllib.request.urlopen to follow and redirects and return the final redirect of the URL.
 def get_final_redirect(url):
-    if not url.startswith("https://"):
-        url = "https://" + url
+    if not url.startswith('https://'):
+        url = 'https://' + url
+    #print(url)
     # try:
     #     with urllib.request.urlopen(url) as response:
     #         final_url = response.geturl()
@@ -52,7 +53,7 @@ def get_link_data(link_id, api_key):
 
 # This method updates a link with a given set of link data.
 def create_link(link_id, api_key, api_secret, link_data):
-    url = "https://api.branch.io/v1/"
+    url = "https://api.branch.io/v1/url"
     alias = get_trailing_url_params(link_id)
     payload = {
         "branch_key": api_key,
@@ -69,59 +70,96 @@ def create_link(link_id, api_key, api_secret, link_data):
     print("_______________________________\n")
     print(f"payload={payload}\n")
 
-    '''response = requests.post(url, headers=headers, json=payload)
+    response = requests.post(url, headers=headers, json=payload)
 
     if response.status_code == 200:
+        print(response.json)
         return response.json()
     else:
         print("Error:", response.text)
-        return None'''
+        return None
 
+#this method reads the original QR urls and puts the final redirects of those urls in a csv file called temp.csv
+def read_csv(filename):
+    #print('Live key: ')
+    #branch_key_live = input()
+    #print('Secret: ')
+    #branch_secret = input()
+    try:
+        with open(filename, 'r') as file:
+            reader = csv.reader(file)
+            rows = [row for row in reader]
+            final_urls = []
+            for row in rows:
+                if row:  # Check if the row is not empty
+                    url = row[0].strip()  # Extract URL from the first column and remove
+                    final_url = get_final_redirect(url)
+                    final_urls.append(final_url)
+            #Update the rows with the new data in the second column
+            for i, row in enumerate(rows):
+                if len(row) < 2:
+                    row.append(final_urls[i])
+                else:
+                    row[1] = final_urls[i]
+        # Write the updated data back to the CSV file
+        with open(filename, 'w', newline='') as file:
+             writer = csv.writer(file)
+             writer.writerows(rows)
+        print(f"{filename} updated successfuly.")
+    except Exception as e:
+        print(f"An error occurred: {e}")
 
-def read_csv_and_update_links(filename):
+#this method grabs the final urls from the temp.csv file and makes a call to Branch to create the link with the corresponding link data
+def update_links(filename):
     print('Live key: ')
     branch_key_live = input()
     print('Secret: ')
     branch_secret = input()
     try:
+        urls = []
         with open(filename, 'r') as file:
             reader = csv.reader(file)
-            x=0
             for row in reader:
-                x+=1
-                print(x)
-                if row:  # Check if the row is not empty
-                    url = row[0].strip()  # Extract URL from the first column and remove
-                    #print("\nget_final_redirect call")
-                    # pdb.set_trace()
-                    final_url = get_final_redirect(url)
-                    print(f"{final_url}")
-                    #if final URL is a Branch link, grab relevant link data and update base URL with that data
-                    if ".app.link" in final_url:
-                        link_data = get_link_data(final_url, branch_key_live)
-                        create_link (url, branch_key_live, branch_secret, link_data)
-                    #else update base URL with final URL as deeplink_path and canonical_url and default analytics
-                    else:
-                        link_data = {
-                            "data" : {
-                                "$deeplink_path" : final_url,
-                                "$canonical_url" : final_url,
-                                "~channel" : "QR",
-                                "~feature" : "marketing",
-                                "~campaign" : "park_QR"
-                                }
-                        }
-                        create_link (url, branch_key_live, branch_secret, link_data)
+                if len(row) > 1:
+                    urls.append(row)
+            print(urls)
+            for url in urls:
+                #if final URL is a Branch link, grab relevant link data and update base URL with that data
+                if ".app.link" in url[1]:
+                    link_data = get_link_data(url[1], branch_key_live)
+                    #create_link (url[0], branch_key_live, branch_secret, link_data)
+                #else update base URL with final URL as deeplink_path and canonical_url and default analytics
+                else:
+                    link_data = {
+                        "data" : {
+                            "$deeplink_path" : url[1],
+                            "$canonical_url" : url[1],
+                            "~channel" : "QR",
+                            "~feature" : "marketing",
+                            "~campaign" : "park_QR",
+                            "web_only" : "true"
+                            }
+                    }
+                    #create_link (url, branch_key_live, branch_secret, link_data)
+                print('\n')
+                print(link_data)
+
     except Exception as e:
         print(f"An error occurred: {e}")
 
 # Example usage:
 # filename = "qr_test.csv" # Replace with the path to .csv or QR URLs
-print('Path to csv: ')
+print('Path to csv of original QR urls: ')
 filename = input()
 
-read_csv_and_update_links(filename)
+print('(a)Read or (b)Update mode?')
+choice = input()
 
-#print(get_final_redirect("https://qr.disneyworld.com/CaptCooks?r=qr"))
-#link_data = get_link_data("https://thisismynew.app.link/disney_test1", "key_live_co7umEq5jRkpqhlerYDaqiebyBdnQsx1")
-#create_link("https://thisismynew.app.link/disney_test1", "key_live_co7umEq5jRkpqhlerYDaqiebyBdnQsx1", "secret_live_Mgb8kfmPoPtKNkhdY3JKhXV0B95VY0Hl", link_data)
+if choice == 'a' or choice == 'read':
+    print('Read mode selected.')
+    read_csv(filename)
+elif choice == 'b' or choice == 'update':
+    print ('Update mode selected.')
+    update_links(filename)
+else:
+    print('Please try again.')
