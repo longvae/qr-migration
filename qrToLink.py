@@ -3,6 +3,7 @@ import requests
 import csv
 import urllib.parse
 import argparse
+import os
 import pdb
 
 # This method uses .urllib.request.urlopen to follow and redirects and return the final redirect of the URL.
@@ -81,6 +82,19 @@ def create_link(link_id, api_key, api_secret, link_data):
     else:
         print("Error:", response.text)
         return None
+    
+
+def write_to_log(message):
+    # Get the current script directory
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+
+    # Define the relative path to the file
+    file_name = 'logging.txt'
+    file_path = os.path.join(script_dir, file_name)
+
+    with open(file_path, 'a') as output_file:
+        output_file.write(message)
+
 
 #this method reads the original QR urls and puts the final redirects of those urls in a csv file called temp.csv
 def read_csv(filename):
