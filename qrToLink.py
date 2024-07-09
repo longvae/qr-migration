@@ -2,6 +2,7 @@ import pandas as pd
 import requests
 import csv
 import urllib.parse
+import argparse
 import pdb
 
 # This method uses .urllib.request.urlopen to follow and redirects and return the final redirect of the URL.
@@ -148,23 +149,52 @@ def update_links(filename):
         print(f"An error occurred: {e}")
 
 
+def build_arg_parser():
+    # Create the arg parser with argparse
+    parser = argparse.ArgumentParser(description="Migrate QR codes")
+
+    # Add arguments
+    parser.add_argument('filename', type=str, help='The path and name of the file to read/udpate')
+    parser.add_argument('-r', '--read', action='store_true', help='Read a file and output its contents')
+    parser.add_argument('-u', '--update', action='store_true', help='Update existing QR codes')
+
+    return parser
+
+
 def main():
-    # Example usage:
-    # filename = "qr_test.csv" # Replace with the path to .csv or QR URLs
-    print('Path to csv of original QR urls: ')
-    filename = input()
+    # Create the arg parser
+    parser = build_arg_parser()
 
-    print('(a)Read or (b)Update mode?')
-    choice = input()
+    # Parse the args
+    parser.parse_args()
 
-    if choice == 'a' or choice == 'read':
-        print('Read mode selected.')
+    # The filename is required as a positional argument. Read it in.
+    filename = parser.filename
+
+    # You need to select an option (read vs update)
+    if parser.read:
         read_csv(filename)
-    elif choice == 'b' or choice == 'update':
-        print ('Update mode selected.')
+    elif parser.update:
         update_links(filename)
     else:
-        print('Please try again.')
+        print('Please select an option on the file')
+
+    # Example usage:
+    # filename = "qr_test.csv" # Replace with the path to .csv or QR URLs
+    # print('Path to csv of original QR urls: ')
+    # filename = input()
+
+    # print('(a)Read or (b)Update mode?')
+    # choice = input()
+
+    # if choice == 'a' or choice == 'read':
+    #     print('Read mode selected.')
+    #     read_csv(filename)
+    # elif choice == 'b' or choice == 'update':
+    #     print ('Update mode selected.')
+    #     update_links(filename)
+    # else:
+    #     print('Please try again.')
 
 
 if __name__=='__main__':
