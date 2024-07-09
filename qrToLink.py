@@ -6,6 +6,7 @@ import argparse
 import os
 import pdb
 from datetime import datetime
+from dotenv import load_dotenv
 
 ENABLE_LOGGING = False
 
@@ -149,10 +150,12 @@ def read_csv(filename):
 
 #this method grabs the final urls from the temp.csv file and makes a call to Branch to create the link with the corresponding link data
 def update_links(filename):
-    print('Live key: ')
-    branch_key_live = input()
-    print('Secret: ')
-    branch_secret = input()
+    # print('Live key: ')
+    # branch_key_live = input()
+    branch_key_live = os.getenv('LIVE_KEY')
+    # print('Secret: ')
+    # branch_secret = input()
+    branch_secret = os.getenv('SECRET_KEY')
     try:
         urls = []
         with open(filename, 'r') as file:
@@ -200,7 +203,20 @@ def build_arg_parser():
     return parser
 
 
+def str_to_bool(value):
+    return value.lower() in ['true', '1', 't', 'y', 'yes']
+
+
 def main():
+    # Load environment variables from the .env file (e.g., keys)
+    load_dotenv()
+
+    # BE SURE TO HAVE A .env FILE IN THE ROOT DIRECTORY
+    # YOUR .env file needs to have the following values:
+    #   SECRET_KEY=[your Branch secret key]
+    #   LIVE_KEY=[your Branch live key]
+    #   ENABLE_LOGGING=false
+
     # Create the arg parser
     parser = build_arg_parser()
 
@@ -210,7 +226,11 @@ def main():
     # The filename is required as a positional argument. Read it in.
     filename = parser.filename
 
-    if parser.logging:
+    # Load the env_enable_logging option (this can be set independently)
+    env_enable_logging = str_to_bool(os.getenv('ENABLE_LOGGING', 'false'))
+
+    # If you specified enable logging 
+    if parser.logging or env_enable_logging:
         ENABLE_LOGGING = True
 
     # Log the program start in our log file
