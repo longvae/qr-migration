@@ -5,6 +5,9 @@ import urllib.parse
 import argparse
 import os
 import pdb
+from datetime import datetime
+
+ENABLE_LOGGING = False
 
 # This method uses .urllib.request.urlopen to follow and redirects and return the final redirect of the URL.
 def get_final_redirect(url):
@@ -26,10 +29,12 @@ def get_final_redirect(url):
         # Send a HEAD request to the endpoint, which would return redirects
         # without returning the body of the request
         response = requests.head(url, headers=headers, allow_redirects=True)
+        write_to_log(f'Found {response.url} as redirect from {url}')
         return response.url
     except requests.RequestException as e:
         print('Warning: did not parse URL: {}'.format(url))
         print(e)
+        write_to_log(f'WARNING: did not parse URL {url} with error: {e}')
 
 # This method returns any url parameters after ".com/"
 def get_trailing_url_params(url):
@@ -47,12 +52,15 @@ def get_link_data(link_id, api_key):
         "Content-Type": "application/json",
     }
     #print(f"\n{url}")
+    write_to_log(f'Starting request to endpoint with URL: {url}')
     response = requests.get(url, headers=headers)
 
     if response.status_code == 200:
+        write_to_log(f'\tRetrieved link data: {response.json()} for URL {link_id}')
         return response.json()
     else:
         print("Error:", response.text)
+        write_to_log(f'\tFailed to retrieve deep link data for link {link_id} with error: {response.text} and status code: {response.status_code}')
         return None
 
 # This method updates a link with a given set of link data.
@@ -73,18 +81,30 @@ def create_link(link_id, api_key, api_secret, link_data):
     }
     print("_______________________________\n")
     print(f"payload={payload}\n")
+    write_to_log(f'Creating URL with payload: {payload}')
 
     response = requests.post(url, headers=headers, json=payload)
 
     if response.status_code == 200:
         print(response.json)
+        write_to_log(f'\tSuccessfully generated link with response: {response.json}')
         return response.json()
     else:
         print("Error:", response.text)
+        write_to_log(f'Failed to generare a URL with error: {response.text} and status code {response.status_code}')
         return None
     
+# Get the date/time string
+def get_date_time_string():
+    now = datetime.now()
+    formatted_date_time = now.strftime('%m/%d/%Y %H:%M')
+    return formatted_date_time
 
+# Use this function to write data to a log file
 def write_to_log(message):
+    if not ENABLE_LOGGING:
+        return
+    
     # Get the current script directory
     script_dir = os.path.dirname(os.path.abspath(__file__))
 
@@ -94,7 +114,6 @@ def write_to_log(message):
 
     with open(file_path, 'a') as output_file:
         output_file.write(message)
-
 
 #this method reads the original QR urls and puts the final redirects of those urls in a csv file called temp.csv
 def read_csv(filename):
@@ -123,8 +142,10 @@ def read_csv(filename):
              writer = csv.writer(file)
              writer.writerows(rows)
         print(f"{filename} updated successfuly.")
+        write_to_log(f'{filename} updated successfully')
     except Exception as e:
         print(f"An error occurred: {e}")
+        write_to_log(f'An error occurred: {e}')
 
 #this method grabs the final urls from the temp.csv file and makes a call to Branch to create the link with the corresponding link data
 def update_links(filename):
@@ -163,6 +184,7 @@ def update_links(filename):
 
     except Exception as e:
         print(f"An error occurred: {e}")
+        write_to_log(f'Encountered an error while updating links: {e}')
 
 
 def build_arg_parser():
@@ -173,6 +195,7 @@ def build_arg_parser():
     parser.add_argument('filename', type=str, help='The path and name of the file to read/udpate')
     parser.add_argument('-r', '--read', action='store_true', help='Read a file and output its contents')
     parser.add_argument('-u', '--update', action='store_true', help='Update existing QR codes')
+    parser.add_argument('-l', '--logging', action='store_true', help='Enable logging')
 
     return parser
 
@@ -186,6 +209,12 @@ def main():
 
     # The filename is required as a positional argument. Read it in.
     filename = parser.filename
+
+    if parser.logging:
+        ENABLE_LOGGING = True
+
+    # Log the program start in our log file
+    write_to_log(f'\n\nSTART: {get_date_time_string()}\n')
 
     # You need to select an option (read vs update)
     if parser.read:
