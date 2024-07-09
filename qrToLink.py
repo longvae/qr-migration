@@ -147,19 +147,25 @@ def update_links(filename):
     except Exception as e:
         print(f"An error occurred: {e}")
 
-# Example usage:
-# filename = "qr_test.csv" # Replace with the path to .csv or QR URLs
-print('Path to csv of original QR urls: ')
-filename = input()
 
-print('(a)Read or (b)Update mode?')
-choice = input()
+def main():
+    # Example usage:
+    # filename = "qr_test.csv" # Replace with the path to .csv or QR URLs
+    print('Path to csv of original QR urls: ')
+    filename = input()
 
-if choice == 'a' or choice == 'read':
-    print('Read mode selected.')
-    read_csv(filename)
-elif choice == 'b' or choice == 'update':
-    print ('Update mode selected.')
-    update_links(filename)
-else:
-    print('Please try again.')
+    print('(a)Read or (b)Update mode?')
+    choice = input()
+
+    if choice == 'a' or choice == 'read':
+        print('Read mode selected.')
+        read_csv(filename)
+    elif choice == 'b' or choice == 'update':
+        print ('Update mode selected.')
+        update_links(filename)
+    else:
+        print('Please try again.')
+
+
+if __name__=='__main__':
+    main()
