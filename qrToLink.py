@@ -22,6 +22,8 @@ def get_final_redirect(url):
     }
 
     try:
+        # Send a HEAD request to the endpoint, which would return redirects
+        # without returning the body of the request
         response = requests.head(url, headers=headers, allow_redirects=True)
         return response.url
     except requests.RequestException as e:
