@@ -8,6 +8,7 @@ import pdb
 from datetime import datetime
 from dotenv import load_dotenv
 
+# This global variable gets updated by the .env file or by the command line when launching this program.
 ENABLE_LOGGING = False
 
 # This method uses .urllib.request.urlopen to follow and redirects and return the final redirect of the URL.
