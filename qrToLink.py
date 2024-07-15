@@ -169,6 +169,8 @@ def update_links(filename):
                 #if final URL is a Branch link, grab relevant link data and update base URL with that data
                 if ".app.link" in url[1]:
                     link_data = get_link_data(url[1], branch_key_live)
+                    # We need to set the link type to type=2 for links:
+                    link_data['data']['type'] = 2
                     create_link (url[0], branch_key_live, branch_secret, link_data)
                 #else update base URL with final URL as deeplink_path and canonical_url and default analytics
                 else:
