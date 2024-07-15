@@ -179,7 +179,7 @@ def update_links(filename):
                             "~channel" : "QR",
                             "~feature" : "marketing",
                             "~campaign" : "park_QR",
-                            "web_only" : "true"
+                            "$web_only" : "true"
                             }
                     }
                     create_link (url[0], branch_key_live, branch_secret, link_data)
