@@ -222,25 +222,25 @@ def main():
     parser = build_arg_parser()
 
     # Parse the args
-    parser.parse_args()
+    args = parser.parse_args()
 
     # The filename is required as a positional argument. Read it in.
-    filename = parser.filename
+    filename = args.filename
 
     # Load the env_enable_logging option (this can be set independently)
     env_enable_logging = str_to_bool(os.getenv('ENABLE_LOGGING', 'false'))
 
     # If you specified enable logging 
-    if parser.logging or env_enable_logging:
+    if args.logging or env_enable_logging:
         ENABLE_LOGGING = True
 
     # Log the program start in our log file
     write_to_log(f'\n\nSTART: {get_date_time_string()}\n')
 
     # You need to select an option (read vs update)
-    if parser.read:
+    if args.read:
         read_csv(filename)
-    elif parser.update:
+    elif args.update:
         update_links(filename)
     else:
         print('Please select an option on the file')
