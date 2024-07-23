@@ -178,6 +178,7 @@ def update_links(filename):
                         "data" : {
                             "$deeplink_path" : url[1],
                             "$canonical_url" : url[1],
+                            "$fallback_url" : url[1],
                             "~channel" : "QR",
                             "~feature" : "marketing",
                             "~campaign" : "park_QR",
