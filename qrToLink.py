@@ -95,7 +95,7 @@ def create_link(link_id, api_key, api_secret, link_data):
         print("Error:", response.text)
         write_to_log(f'Failed to generare a URL with error: {response.text} and status code {response.status_code}')
         return None
-    
+
 # Get the date/time string
 def get_date_time_string():
     now = datetime.now()
@@ -106,7 +106,7 @@ def get_date_time_string():
 def write_to_log(message):
     if not ENABLE_LOGGING:
         return
-    
+
     # Get the current script directory
     script_dir = os.path.dirname(os.path.abspath(__file__))
 
@@ -181,7 +181,7 @@ def update_links(filename):
                             "~channel" : "QR",
                             "~feature" : "marketing",
                             "~campaign" : "park_QR",
-                            "$web_only" : "true",
+                            "web_only" : "true",
                             "type": 2
                             }
                     }
@@ -233,7 +233,7 @@ def main():
     # Load the env_enable_logging option (this can be set independently)
     env_enable_logging = str_to_bool(os.getenv('ENABLE_LOGGING', 'false'))
 
-    # If you specified enable logging 
+    # If you specified enable logging
     if args.logging or env_enable_logging:
         ENABLE_LOGGING = True
 
